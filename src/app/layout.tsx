@@ -1,6 +1,14 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
+import { Geist, Geist_Mono } from "next/font/google";
+
+import { AppKit } from "@/context/appkit";
+import AppNavbar from "@/components/layouts/navbar/navbar";
+import ContractProvider from "@/context/contract-provider";
+import EventCreateModal from "@/components/event-create-modal/event-create-modal";
+import type { Metadata } from "next";
+import NftMintedModal from "@/components/nft-minted-modal/nft-minted-modal";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +35,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <AppKit>
+          <ContractProvider>
+            <AppNavbar />
+            <EventCreateModal />
+            <NftMintedModal />
+
+            <Toaster />
+            <main className="p-4">{children}</main>
+          </ContractProvider>
+        </AppKit>
       </body>
     </html>
   );
