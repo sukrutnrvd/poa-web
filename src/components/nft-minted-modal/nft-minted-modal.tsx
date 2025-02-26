@@ -16,6 +16,9 @@ const NftMintedModal = ({}) => {
   const { closeModal, modals } = useModalStore();
   return (
     <Modal
+      classNames={{
+        base: "m-0 rounded-b-none sm:rounded-lg",
+      }}
       isOpen={modals.nftMintedModal.isOpen}
       onClose={() => {
         closeModal("nftMintedModal");

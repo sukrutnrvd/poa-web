@@ -17,7 +17,7 @@ interface PoaContractStore {
 }
 
 const initialState: PoaContractState = {
-  contractAddress: "0x33fa71216D2938e6F476834C26CBFbb73283F4Ea",
+  contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "",
   abi: [
     {
       inputs: [

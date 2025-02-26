@@ -1,10 +1,12 @@
 "use client";
 
+import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
+
 import { Button } from "@nextui-org/button";
 import EventCard from "@/components/event-card/event-card";
 import { FaRegCalendarPlus } from "react-icons/fa";
 import { Skeleton } from "@nextui-org/skeleton";
-import { useAppKitAccount } from "@reown/appkit/react";
+import { chainIdToNetworkName } from "@/utils/chainIdToNetworkName";
 import { useEffect } from "react";
 import { useEventsStore } from "@/store/events.store";
 import { useModalStore } from "@/store/modals.store";
@@ -17,9 +19,11 @@ export default function Home() {
 
   const { openModal } = useModalStore();
 
+  const { chainId } = useAppKitNetwork();
+
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    fetchEvents(chainIdToNetworkName(chainId));
+  }, [chainId]);
 
   const { address } = useAppKitAccount();
 

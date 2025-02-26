@@ -27,7 +27,7 @@ const AppNavbar = () => {
   const { openModal } = useModalStore();
 
   return (
-    <Navbar shouldHideOnScroll className="bg-zinc-900">
+    <Navbar className="bg-zinc-900">
       <NavbarBrand>
         <p className="font-bold text-inherit">POA</p>
       </NavbarBrand>

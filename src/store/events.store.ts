@@ -9,7 +9,7 @@ interface IEventState {
 
 interface IEventStore {
   state: IEventState;
-  fetchEvents: () => void;
+  fetchEvents: (networkName?: string) => void;
 }
 
 const initailState: IEventState = {
@@ -52,10 +52,8 @@ const initailState: IEventState = {
 
 export const useEventsStore = create<IEventStore>((set) => ({
   state: initailState,
-  fetchEvents: async () => {
-    const events: any = await getEvents();
-    console.log(events);
-
+  fetchEvents: async (networkName?: string) => {
+    const events: any = await getEvents(networkName);
     set({ state: { ...initailState, events, isLoading: false } });
   },
 }));

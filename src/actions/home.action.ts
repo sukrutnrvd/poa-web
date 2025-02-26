@@ -1,12 +1,17 @@
 "use server";
 
-export const getEvents = async () => {
+export const getEvents = async (networkName?: string) => {
   try {
-    const response = await fetch(`${process.env.API_ENDPOINT}/events`, {
-      headers: {
-        "x-api-key": process.env.API_KEY || "",
-      },
-    });
+    const response = await fetch(
+      `${process.env.API_ENDPOINT}/events${
+        networkName ? `?network=${networkName}` : ""
+      }`,
+      {
+        headers: {
+          "x-api-key": process.env.API_KEY || "",
+        },
+      }
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch events");
     }

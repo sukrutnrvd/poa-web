@@ -1,6 +1,16 @@
 "use client";
 
-import { AiOutlineCalendar, AiOutlineCrown } from "react-icons/ai";
+import {
+  AiOutlineBank,
+  AiOutlineCalendar,
+  AiOutlineCrown,
+  AiOutlineGift,
+  AiOutlineRocket,
+  AiOutlineTeam,
+  AiOutlineTool,
+  AiOutlineUsergroupAdd,
+  AiOutlineVideoCamera,
+} from "react-icons/ai";
 import { Card, CardFooter, CardHeader } from "@nextui-org/card";
 import { Popover, PopoverContent, PopoverTrigger } from "@nextui-org/popover";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
@@ -62,7 +72,6 @@ const EventCard: React.FC<EventCardProps> = ({
     setIsLoading(true);
     try {
       const { whitelist } = await getEvent(+eventId);
-      console.log(whitelist);
 
       const leaves = whitelist.map((x: string) =>
         keccak256(x.toLowerCase().trim())
@@ -104,42 +113,52 @@ const EventCard: React.FC<EventCardProps> = ({
       <Card className=" h-[300px]">
         <CardHeader className="absolute z-10 top-1 justify-between ">
           <div>
-            <p className="text-tiny text-white/60 uppercase font-bold">
-              {name}
-            </p>
-            <h4 className="text-white font-medium text-large">
-              {type} by {owner.slice(0, 5)}...{owner.slice(-5)}
-            </h4>
+            <div className="flex gap-2">
+              <p className="text-tiny text-white/60 uppercase font-bold">
+                {name}
+              </p>
+              <Popover showArrow>
+                <PopoverTrigger>
+                  <button>
+                    {type === "Conference" && <AiOutlineTeam />}
+                    {type === "Workshop" && <AiOutlineTool />}
+                    {type === "Webinar" && <AiOutlineVideoCamera />}
+                    {type === "Meetup" && <AiOutlineUsergroupAdd />}
+                    {type === "NFT Drop" && <AiOutlineGift />}
+                    {type === "Token Launch" && <AiOutlineRocket />}
+                    {type === "DAO Meeting" && <AiOutlineBank />}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent>
+                  {type} by {owner.slice(0, 5)}...{owner.slice(-5)}
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
-          {isOwner && (
-            <Popover showArrow>
-              <PopoverTrigger>
-                <Button
-                  variant="light"
-                  className="p-0 min-w-0 min-h-0 w-9 h-9"
-                  radius="full"
-                  isIconOnly
-                >
-                  <AiOutlineCrown size={24} />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent>You are the owner of this event</PopoverContent>
-            </Popover>
-          )}
+          {isOwner && <AiOutlineCrown size={24} />}
         </CardHeader>
 
         <CardFooter className="absolute z-10 bottom-0 flex justify-between">
           {isLessThanOneDay ? (
-            <Countdown ref={countdownRef} autoStart date={eventDate.toDate()} />
+            <Countdown
+              ref={countdownRef}
+              autoStart
+              date={eventDate.toDate()}
+              renderer={({ days, hours, minutes, seconds }) => (
+                <div>
+                  {hours}h {minutes}m {seconds}s
+                </div>
+              )}
+            />
           ) : (
-            <Popover showArrow>
+            <Popover>
               <PopoverTrigger>
-                <Button variant="flat" isIconOnly>
+                <button>
                   <AiOutlineCalendar />
-                </Button>
+                </button>
               </PopoverTrigger>
               <PopoverContent>
-                Event ends: {eventDate.format("MMMM D, YYYY h:mm A")}
+                Mint ends: {eventDate.format("MMMM D, YYYY h:mm A")}
               </PopoverContent>
             </Popover>
           )}

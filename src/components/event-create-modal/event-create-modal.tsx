@@ -11,19 +11,22 @@ import {
   useDisclosure,
 } from "@nextui-org/modal";
 import React, { useEffect, useState } from "react";
+import { Select, SelectItem } from "@nextui-org/select";
 import { getLocalTimeZone, now, today } from "@internationalized/date";
+import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 
 import { BigNumberish } from "ethers";
 import { Button } from "@nextui-org/button";
+import { CiWarning } from "react-icons/ci";
 import { DateInput } from "@nextui-org/date-input";
 import EventCreatedModal from "../event-created-modal/event-created-modal";
 import { EventLog } from "ethers";
 import MerkleTree from "merkletreejs";
+import { chainIdToNetworkName } from "@/utils/chainIdToNetworkName";
 import { createEvent } from "./event-create-modal.action";
 import { handleContractErrors } from "@/utils/handle-contract-errors";
 import { keccak256 } from "ethers";
 import { triggerConfetti } from "@/utils/trigger-confetti";
-import { useAppKitAccount } from "@reown/appkit/react";
 import { useEventsStore } from "@/store/events.store";
 import { useModalStore } from "@/store/modals.store";
 import { usePoaContractStore } from "@/store/poa-contract.store";
@@ -33,6 +36,14 @@ export interface EventFormData {
   metadataURI: string;
   whitelist: string;
   date: Date;
+  eventType:
+    | "Conference"
+    | "Workshop"
+    | "Webinar"
+    | "Meetup"
+    | "NFT Drop"
+    | "Token Launch"
+    | "DAO Meeting";
 }
 
 const EventCreateModal = () => {
@@ -50,6 +61,8 @@ const EventCreateModal = () => {
   } = usePoaContractStore();
 
   const { address } = useAppKitAccount();
+
+  const { chainId } = useAppKitNetwork();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -80,10 +93,11 @@ const EventCreateModal = () => {
         const event: EventLog = receipt.logs?.find(
           (event: EventLog) => event.fragment.name === "EventCreated"
         );
-
         const eventId = event?.args[0] as BigNumberish;
 
-        if (eventId) {
+        const networkName = chainIdToNetworkName(chainId);
+
+        if (eventId !== undefined) {
           createEvent({
             date: data.date,
             eventId: +eventId.toString(),
@@ -91,8 +105,10 @@ const EventCreateModal = () => {
             name: data.name,
             owner: address!,
             whitelist: data.whitelist,
+            eventType: data.eventType,
+            networkName,
           }).then(() => {
-            fetchEvents();
+            fetchEvents(networkName);
             triggerConfetti(5);
             onOpen();
             closeModal("createEventModal");
@@ -102,7 +118,6 @@ const EventCreateModal = () => {
         }
       }
     } catch (error) {
-      console.log(error);
       handleContractErrors(error as Error);
       setIsLoading(false);
     }
@@ -149,6 +164,66 @@ const EventCreateModal = () => {
                 isInvalid={!!errors.metadataURI}
               />
 
+              <Controller
+                control={control}
+                name="date"
+                rules={{ required: "Event date is required" }}
+                render={({ field }) => (
+                  <DateInput
+                    errorMessage={errors.date?.message}
+                    isInvalid={!!errors.date}
+                    onChange={(date) =>
+                      field.onChange(date?.toDate(getLocalTimeZone()))
+                    }
+                    label="Event Date"
+                    granularity="minute"
+                    minValue={now(getLocalTimeZone())}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="eventType"
+                rules={{ required: "Event date is required" }}
+                render={({ field }) => (
+                  <Select
+                    defaultSelectedKeys={["conference"]}
+                    label="Event Type"
+                    {...register("eventType", {
+                      required: "Event type is required",
+                    })}
+                    errorMessage={errors.eventType?.message}
+                    isInvalid={!!errors.eventType}
+                    onChange={(e) => {
+                      field.onChange(e);
+                    }}
+                  >
+                    <SelectItem key="Conference" value="conference">
+                      Conference
+                    </SelectItem>
+                    <SelectItem key="Workshop" value="workshop">
+                      Workshop
+                    </SelectItem>
+                    <SelectItem key="Webinar" value="webinar">
+                      Webinar
+                    </SelectItem>
+                    <SelectItem key="Meetup" value="meetup">
+                      Meetup
+                    </SelectItem>
+                    <SelectItem key="Token Launch" value="token-launch">
+                      Token Launch
+                    </SelectItem>
+                    <SelectItem key="DAO Meeting" value="dao-meeting">
+                      DAO Meeting
+                    </SelectItem>
+                    <SelectItem key="Other" value="other">
+                      Other
+                    </SelectItem>
+                  </Select>
+                )}
+              />
+
               <Textarea
                 label="Whitelist"
                 {...register("whitelist", {
@@ -172,23 +247,12 @@ const EventCreateModal = () => {
                 isInvalid={!!errors.whitelist}
                 placeholder="Whitelist addresses"
               />
-              <Controller
-                control={control}
-                name="date"
-                rules={{ required: "Event date is required" }}
-                render={({ field }) => (
-                  <DateInput
-                    errorMessage={errors.date?.message}
-                    isInvalid={!!errors.date}
-                    onChange={(date) =>
-                      field.onChange(date?.toDate(getLocalTimeZone()))
-                    }
-                    label="Event Date"
-                    granularity="minute"
-                    minValue={now(getLocalTimeZone())}
-                  />
-                )}
-              />
+              <div className="flex gap-2 items-center ">
+                <CiWarning size={20} className="text-warning" />
+                <p className="text-sm text-gray-500">
+                  You can't update the event whitelist after it's created.
+                </p>
+              </div>
             </form>
           </ModalBody>
           <ModalFooter>

@@ -6,6 +6,7 @@ import { handleContractErrors } from "@/utils/handle-contract-errors";
 interface Event extends EventFormData {
   eventId: number;
   owner: string;
+  networkName: string;
 }
 
 export const createEvent = async (data: Event) => {
@@ -18,7 +19,7 @@ export const createEvent = async (data: Event) => {
       },
       body: JSON.stringify({
         name: data.name,
-        type: "OTHER",
+        type: data.eventType,
         date: data.date,
         metadataUri: data.metadataURI,
         eventId: data.eventId,
@@ -27,6 +28,7 @@ export const createEvent = async (data: Event) => {
           .replace(/\r\n/g, "\n")
           .split("\n")
           .map((address) => address.toLowerCase().trim()),
+        network: data.networkName,
       }),
     });
     if (!response.ok) {
